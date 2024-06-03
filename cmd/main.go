@@ -7,11 +7,11 @@ import (
 )
 
 func main() {
-	ebiten.SetWindowSize(1600, 1200)
+	ebiten.SetWindowSize(800, 600)
 	ebiten.SetWindowTitle("Hello, World!")
 	ebiten.SetCursorMode(ebiten.CursorModeCaptured)
 
-	g := &game.Game{}
+	g := &game.GameUVN{}
 	err := g.Init()
 	if err != nil {
 		panic(err)

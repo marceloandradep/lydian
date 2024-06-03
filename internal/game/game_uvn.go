@@ -9,26 +9,20 @@ import (
 	"lydian/internal/rendering/camera"
 )
 
-const (
-	screenWidth  = 800
-	screenHeight = 600
-)
-
-type Game struct {
+type GameUVN struct {
 	cube       rendering.Object3D
 	cubePos    *math.Vector
 	cubeRot    *math.Vector
 	camera     camera.Camera
 	cameraPos  *math.Vector
-	cameraRot  *math.Vector
-	forward    *math.Vector
-	left       *math.Vector
+	elevation  float64
+	heading    float64
 	lastMouseX int
 	lastMouseY int
 	clipper    graphics.Clipper
 }
 
-func (g *Game) Init() error {
+func (g *GameUVN) Init() error {
 	g.clipper = graphics.Clipper{MinX: 0, MinY: 0, MaxX: screenWidth - 1, MaxY: screenHeight - 1}
 
 	pos := math.NewVector(0, 0, 0)
@@ -42,26 +36,22 @@ func (g *Game) Init() error {
 	g.cube = *cube
 
 	g.cameraPos = math.NewVector(0, 0, 0)
-	g.cameraRot = math.NewVector(0, 0, 0)
 
 	viewPortSize := geometry.Dimension{
 		Width:  screenWidth - 1,
 		Height: screenHeight - 1,
 	}
 
-	euler := camera.NewEuler(*g.cameraPos, *g.cameraRot, math.RotationZYX, 50, 500, 90, viewPortSize)
-	g.camera = euler
+	uvn := camera.NewUVN(*g.cameraPos, *math.NewVector(0, 0, 0), 50, 500, 90, viewPortSize)
+	g.camera = uvn
 
 	g.cubePos = math.NewVector(0, 0, 100)
 	g.cubeRot = math.NewVector(0, 0, 0)
 
-	g.forward = math.NewVector(0, 0, 1)
-	g.left = math.NewVector(-1, 0, 0)
-
 	return nil
 }
 
-func (g *Game) Update() error {
+func (g *GameUVN) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyEscape) {
 		return ebiten.Termination
 	}
@@ -82,27 +72,23 @@ func (g *Game) Update() error {
 	g.lastMouseX = x
 	g.lastMouseY = y
 
-	g.cameraRot.X -= float64(dy)
-	g.cameraRot.Y -= float64(dx)
-
-	rot := math.RotationMatrix(float64(dx), math.YAxis)
-	g.forward = rot.MultiplyVertex(*g.forward)
-	g.left = rot.MultiplyVertex(*g.left)
+	g.elevation -= float64(dy)
+	g.heading -= float64(dx)
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.cameraPos = g.cameraPos.Add(*g.forward)
+		g.cameraPos.Z += 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.cameraPos = g.cameraPos.Sub(*g.forward)
+		g.cameraPos.Z -= 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.cameraPos = g.cameraPos.Add(*g.left)
+		g.cameraPos.X -= 1
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.cameraPos = g.cameraPos.Sub(*g.left)
+		g.cameraPos.X += 1
 	}
 
 	g.cube.Reset()
@@ -112,21 +98,23 @@ func (g *Game) Update() error {
 	g.cubeRot.Y += 1
 	g.cubeRot.Z += 1
 
-	rotation := math.RotationSequenceMatrix(g.cubeRot.X, g.cubeRot.Y, g.cubeRot.Z, math.RotationZYX)
+	// rotation := math.RotationSequenceMatrix(g.cubeRot.X, g.cubeRot.Y, g.cubeRot.Z, math.RotationZYX)
+	rotation := math.IdentityMatrix()
 	g.cube.Transform(rotation, rendering.LocalToTransformed, true)
 
 	g.camera.SetPosition(g.cameraPos.X, g.cameraPos.Y, g.cameraPos.Z)
-	g.camera.(*camera.EulerCamera).SetRotation(g.cameraRot.X, g.cameraRot.Y, g.cameraRot.Z)
+	g.camera.(*camera.UVNCamera).SetPolarCoordinates(g.elevation, g.heading)
+	// g.camera.(*camera.UVNCamera).SetTarget(*g.cube.GetWorldPos())
 	g.camera.Update()
 	g.cube.Update(g.camera)
 
 	return nil
 }
 
-func (g *Game) Draw(screen *ebiten.Image) {
+func (g *GameUVN) Draw(screen *ebiten.Image) {
 	graphics.DrawObject(screen, g.clipper, g.cube)
 }
 
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
+func (g *GameUVN) Layout(outsideWidth, outsideHeight int) (int, int) {
 	return screenWidth, screenHeight
 }
