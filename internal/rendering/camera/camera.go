@@ -10,6 +10,7 @@ type Camera interface {
 	SetPosition(x, y, z float64)
 	GetPosition() *m.Vector
 	IsCulled(sphere m.Sphere) bool
+	IsVertexWithinFrustum(v m.Vector) bool
 	Update()
 	WorldToCameraMatrix() *m.Matrix
 	CameraToPerspectiveMatrix() *m.Matrix
@@ -77,6 +78,29 @@ func (c *BaseCamera) IsCulled(sphere m.Sphere) bool {
 	}
 
 	return false
+}
+
+func (c *BaseCamera) IsVertexWithinFrustum(v m.Vector) bool {
+	// no clipping available yet
+	if v.Z < 0 {
+		return false
+	}
+
+	if (v.Z > c.farClipZ) || (v.Z < c.nearClipZ) {
+		return false
+	}
+
+	xLimit := (0.5 * c.viewPlaneSize.Width * v.Z) / c.viewDistance
+	if (v.X > xLimit) || (v.X < -xLimit) {
+		return false
+	}
+
+	yLimit := (0.5 * c.viewPlaneSize.Height * v.Z) / c.viewDistance
+	if (v.Y > yLimit) || (v.Y < -xLimit) {
+		return false
+	}
+
+	return true
 }
 
 func (c *BaseCamera) init(pos m.Vector, nearClipZ float64, farClipZ float64, fov float64, viewPortSize geometry.Dimension) {

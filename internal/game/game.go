@@ -16,6 +16,7 @@ const (
 
 type Game struct {
 	cube       rendering.Object3D
+	ground     *rendering.RenderList
 	cubePos    *math.Vector
 	cubeRot    *math.Vector
 	camera     camera.Camera
@@ -34,6 +35,8 @@ func (g *Game) Init() error {
 	pos := math.NewVector(0, 0, 0)
 	scale := math.NewVector(5, 5, 5)
 	rot := math.NewVector(0, 0, 0)
+
+	g.ground = createMap(100)
 
 	cube, err := rendering.Load("/Users/marcelopereira/GolandProjects/lydian/internal/game/resources/cube.plg", *pos, *scale, *rot)
 	if err != nil {
@@ -105,6 +108,8 @@ func (g *Game) Update() error {
 		g.cameraPos = g.cameraPos.Sub(*g.left)
 	}
 
+	g.ground.Reset()
+
 	g.cube.Reset()
 	g.cube.SetWorldPos(g.cubePos.X, g.cubePos.Y, g.cubePos.Z)
 
@@ -119,12 +124,14 @@ func (g *Game) Update() error {
 	g.camera.(*camera.EulerCamera).SetRotation(g.cameraRot.X, g.cameraRot.Y, g.cameraRot.Z)
 	g.camera.Update()
 	g.cube.Update(g.camera)
+	g.ground.Update(g.camera)
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	graphics.DrawObject(screen, g.clipper, g.cube)
+	// graphics.DrawObject(screen, g.clipper, g.cube)
+	graphics.DrawRenderList(screen, g.clipper, g.ground)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

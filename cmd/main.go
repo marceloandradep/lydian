@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
-	"lydian/internal/game"
+	"lydian/refactor/game"
 )
 
 func main() {
@@ -11,7 +11,7 @@ func main() {
 	ebiten.SetWindowTitle("Hello, World!")
 	ebiten.SetCursorMode(ebiten.CursorModeCaptured)
 
-	g := &game.GameUVN{}
+	g := &game.Game{}
 	err := g.Init()
 	if err != nil {
 		panic(err)
