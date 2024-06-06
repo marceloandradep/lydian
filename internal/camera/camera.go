@@ -108,9 +108,9 @@ func (c *Camera) Update() {
 func (c *Camera) AddTriangleToCamera(t *rendering.Triangle3D) {
 	index := len(c.localVertexList)
 
-	if c.isBackFaced(t) {
+	/*if c.isBackFaced(t) {
 		return
-	}
+	}*/
 
 	p0, p1, p2 := t.Vertices()
 	t0 := math.NewVector3(p0.X, p0.Y, p0.Z)
