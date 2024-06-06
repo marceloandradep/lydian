@@ -1,9 +1,9 @@
 package camera
 
 import (
-	"lydian/refactor/geometry"
-	"lydian/refactor/math"
-	"lydian/refactor/rendering"
+	"lydian/internal/geometry"
+	"lydian/internal/math"
+	"lydian/internal/rendering"
 	m "math"
 )
 
@@ -77,6 +77,23 @@ func (c *Camera) Rotate(rotation *math.Vector) {
 	c.rotation.Set(rotation)
 }
 
+func (c *Camera) SetTarget(target *math.Vector) {
+	c.target = target
+}
+
+func (c *Camera) SetPolarCoordinates(elevation, heading float64) {
+	phi := math.DegreesToRadians(elevation)
+	theta := math.DegreesToRadians(heading)
+
+	cosPhi := m.Cos(phi)
+	sinPhi := m.Sin(phi)
+
+	cosTheta := m.Cos(theta)
+	sinTheta := m.Sin(theta)
+
+	c.target = math.NewVector3(-cosPhi*sinTheta+c.pos.X, sinPhi+c.pos.Y, cosPhi*cosTheta+c.pos.Z)
+}
+
 func (c *Camera) Clear() {
 	c.localVertexList = c.localVertexList[:0]
 	c.triangleList = c.triangleList[:0]
@@ -88,31 +105,44 @@ func (c *Camera) Update() {
 	c.computePerspectiveToScreen()
 }
 
-func (c *Camera) AddToCamera(t *rendering.Triangle3D) {
+func (c *Camera) AddTriangleToCamera(t *rendering.Triangle3D) {
 	index := len(c.localVertexList)
 
-	p0, p1, p2 := t.Vertices()
-	c.localVertexList = append(c.localVertexList, math.NewVector3(p0.X, p0.Y, p0.Z))
-	c.localVertexList = append(c.localVertexList, math.NewVector3(p1.X, p1.Y, p1.Z))
-	c.localVertexList = append(c.localVertexList, math.NewVector3(p2.X, p2.Y, p2.Z))
+	if c.isBackFaced(t) {
+		return
+	}
 
-	triangleCopy := rendering.NewTriangle3D(c.localVertexList, index, index+1, index+2)
+	p0, p1, p2 := t.Vertices()
+	t0 := math.NewVector3(p0.X, p0.Y, p0.Z)
+	t1 := math.NewVector3(p1.X, p1.Y, p1.Z)
+	t2 := math.NewVector3(p2.X, p2.Y, p2.Z)
+
+	c.worldToCameraTransform(t0)
+	c.worldToCameraTransform(t1)
+	c.worldToCameraTransform(t2)
+
+	c.localVertexList = append(c.localVertexList, t0)
+	c.localVertexList = append(c.localVertexList, t1)
+	c.localVertexList = append(c.localVertexList, t2)
+
+	triangleCopy := rendering.NewTriangle3D(c.localVertexList, index, index+1, index+2, t.Is2Sided, t.Color)
+
+	if c.culled(triangleCopy) {
+		return
+	}
+
 	c.triangleList = append(c.triangleList, triangleCopy)
 }
 
-func (c *Camera) ProjectTriangles() []*rendering.Triangle3D {
-	tList := make([]*rendering.Triangle3D, 0)
+func (c *Camera) AddSceneToCamera(s *rendering.Scene) {
+	for _, t := range s.TriangleList() {
+		c.AddTriangleToCamera(t)
+	}
+}
+
+func (c *Camera) ProjectTriangles() {
 	visited := make([]bool, len(c.localVertexList))
-	for _, v := range c.localVertexList {
-		c.worldToCameraTransform(v)
-	}
 	for _, t := range c.triangleList {
-		if c.culled(t) {
-			continue
-		}
-		tList = append(tList, t)
-	}
-	for _, t := range tList {
 		for _, k := range t.Indices {
 			if visited[k] {
 				continue
@@ -122,7 +152,10 @@ func (c *Camera) ProjectTriangles() []*rendering.Triangle3D {
 			c.perspectiveToScreenTransform(c.localVertexList[k])
 		}
 	}
-	return tList
+}
+
+func (c *Camera) TriangleList() []*rendering.Triangle3D {
+	return c.triangleList
 }
 
 func (c *Camera) init() {
@@ -159,9 +192,9 @@ func (c *Camera) init() {
 func (c *Camera) culled(t *rendering.Triangle3D) bool {
 	p0, p1, p2 := t.Vertices()
 
-	/*if !c.contains(p0) && !c.contains(p1) && !c.contains(p2) {
+	if !c.contains(p0) && !c.contains(p1) && !c.contains(p2) {
 		return true
-	}*/
+	}
 
 	if p0.Z <= 0 || p1.Z <= 0 || p2.Z <= 0 {
 		return true
@@ -186,6 +219,28 @@ func (c *Camera) contains(p *math.Vector) bool {
 	}
 
 	return true
+}
+
+func (c *Camera) isBackFaced(t *rendering.Triangle3D) bool {
+	if t.Is2Sided {
+		return false
+	}
+
+	p0, p1, p2 := t.Vertices()
+
+	u := p1.Sub(p0)
+	v := p2.Sub(p0)
+
+	normal := u.Cross(v)
+	view := c.pos.Sub(p0)
+
+	dot := normal.Dot(view)
+
+	if dot <= 0 {
+		return true
+	}
+
+	return false
 }
 
 func (c *Camera) computeWorldToCamera() {

@@ -1,16 +1,21 @@
 package rendering
 
-import "lydian/refactor/math"
+import "lydian/internal/math"
 
 type Triangle3D struct {
-	vertices []*math.Vector
 	Indices  [3]int
+	Color    uint32
+	Is2Sided bool
+
+	vertices []*math.Vector
 }
 
-func NewTriangle3D(vertices []*math.Vector, p0, p1, p2 int) *Triangle3D {
+func NewTriangle3D(vertices []*math.Vector, p0, p1, p2 int, is2Sided bool, clr uint32) *Triangle3D {
 	return &Triangle3D{
-		vertices: vertices,
 		Indices:  [3]int{p0, p1, p2},
+		Color:    clr,
+		Is2Sided: is2Sided,
+		vertices: vertices,
 	}
 }
 

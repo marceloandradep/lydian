@@ -3,15 +3,24 @@ package main
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"log"
-	"lydian/refactor/game"
+	"lydian/internal/game"
+)
+
+const (
+	screenWidth  = 2000
+	screenHeight = 1500
 )
 
 func main() {
-	ebiten.SetWindowSize(800, 600)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Hello, World!")
 	ebiten.SetCursorMode(ebiten.CursorModeCaptured)
+	// ebiten.SetFullscreen(true)
 
-	g := &game.Game{}
+	g := &game.Game{
+		ScreenWidth:  screenWidth,
+		ScreenHeight: screenHeight,
+	}
 	err := g.Init()
 	if err != nil {
 		panic(err)

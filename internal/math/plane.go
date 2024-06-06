@@ -1,13 +1,13 @@
 package math
 
 type Plane struct {
-	P0     Vector
-	Normal Vector
+	P0     *Vector
+	Normal *Vector
 }
 
-func NewPlane(p0 Vector, n Vector, normalize bool) *Plane {
+func NewPlane(p0 *Vector, n *Vector, normalize bool) *Plane {
 	if normalize {
-		n = *n.Normalize()
+		n.Normalize()
 	}
 	return &Plane{
 		P0:     p0,

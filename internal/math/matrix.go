@@ -25,7 +25,7 @@ type Matrix struct {
 	M [4][4]float64
 }
 
-func (m *Matrix) MultiplyMatrix(n Matrix) *Matrix {
+func (m *Matrix) MultiplyMatrix(n *Matrix) *Matrix {
 	return &Matrix{
 		M: [4][4]float64{
 			{m.M[0][0]*n.M[0][0] + m.M[0][1]*n.M[1][0] + m.M[0][2]*n.M[2][0] + m.M[0][3]*n.M[3][0], m.M[0][0]*n.M[0][1] + m.M[0][1]*n.M[1][1] + m.M[0][2]*n.M[2][1] + m.M[0][3]*n.M[3][1], m.M[0][0]*n.M[0][2] + m.M[0][1]*n.M[1][2] + m.M[0][2]*n.M[2][2] + m.M[0][3]*n.M[3][2], m.M[0][0]*n.M[0][3] + m.M[0][1]*n.M[1][3] + m.M[0][2]*n.M[2][3] + m.M[0][3]*n.M[3][3]},
@@ -36,7 +36,7 @@ func (m *Matrix) MultiplyMatrix(n Matrix) *Matrix {
 	}
 }
 
-func (m *Matrix) MultiplyVertex(v Vector) *Vector {
+func (m *Matrix) MultiplyVertex(v *Vector) *Vector {
 	return &Vector{
 		X: v.X*m.M[0][0] + v.Y*m.M[1][0] + v.Z*m.M[2][0] + v.W*m.M[3][0],
 		Y: v.X*m.M[0][1] + v.Y*m.M[1][1] + v.Z*m.M[2][1] + v.W*m.M[3][1],
@@ -119,17 +119,17 @@ func RotationSequenceMatrix(dx, dy, dz float64, seq RotationSequence) *Matrix {
 	zRot := RotationMatrix(dz, ZAxis)
 	switch seq {
 	case RotationXYZ:
-		return xRot.MultiplyMatrix(*yRot.MultiplyMatrix(*zRot))
+		return xRot.MultiplyMatrix(yRot.MultiplyMatrix(zRot))
 	case RotationYXZ:
-		return yRot.MultiplyMatrix(*xRot.MultiplyMatrix(*zRot))
+		return yRot.MultiplyMatrix(xRot.MultiplyMatrix(zRot))
 	case RotationXZY:
-		return xRot.MultiplyMatrix(*zRot.MultiplyMatrix(*yRot))
+		return xRot.MultiplyMatrix(zRot.MultiplyMatrix(yRot))
 	case RotationYZX:
-		return yRot.MultiplyMatrix(*zRot.MultiplyMatrix(*xRot))
+		return yRot.MultiplyMatrix(zRot.MultiplyMatrix(xRot))
 	case RotationZYX:
-		return zRot.MultiplyMatrix(*yRot.MultiplyMatrix(*xRot))
+		return zRot.MultiplyMatrix(yRot.MultiplyMatrix(xRot))
 	case RotationZXY:
-		return zRot.MultiplyMatrix(*xRot.MultiplyMatrix(*yRot))
+		return zRot.MultiplyMatrix(xRot.MultiplyMatrix(yRot))
 	default:
 		return nil
 	}

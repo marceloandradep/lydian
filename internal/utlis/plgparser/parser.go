@@ -10,8 +10,8 @@ import (
 
 type PLGObject struct {
 	Header      *PLGHeader
-	VertexList  []plgpolygon.PLGVertex
-	PolygonList []plgpolygon.PLGPolygon
+	VertexList  []*plgpolygon.PLGVertex
+	PolygonList []*plgpolygon.PLGPolygon
 }
 
 type PLGHeader struct {
@@ -71,8 +71,8 @@ func readHeader(s *bufio.Scanner) (*PLGHeader, error) {
 	}, nil
 }
 
-func readVertexList(s *bufio.Scanner, n int) ([]plgpolygon.PLGVertex, error) {
-	vertices := make([]plgpolygon.PLGVertex, 0)
+func readVertexList(s *bufio.Scanner, n int) ([]*plgpolygon.PLGVertex, error) {
+	vertices := make([]*plgpolygon.PLGVertex, 0)
 
 	for i := 0; i < n; i++ {
 		line := readLine(s)
@@ -97,14 +97,14 @@ func readVertexList(s *bufio.Scanner, n int) ([]plgpolygon.PLGVertex, error) {
 			return nil, InvalidSyntax
 		}
 
-		vertices = append(vertices, plgpolygon.PLGVertex{X: x, Y: y, Z: z})
+		vertices = append(vertices, &plgpolygon.PLGVertex{X: x, Y: y, Z: z})
 	}
 
 	return vertices, nil
 }
 
-func readPolygonList(s *bufio.Scanner, n int) ([]plgpolygon.PLGPolygon, error) {
-	polygons := make([]plgpolygon.PLGPolygon, 0)
+func readPolygonList(s *bufio.Scanner, n int) ([]*plgpolygon.PLGPolygon, error) {
+	polygons := make([]*plgpolygon.PLGPolygon, 0)
 
 	for i := 0; i < n; i++ {
 		line := readLine(s)
@@ -136,7 +136,7 @@ func readPolygonList(s *bufio.Scanner, n int) ([]plgpolygon.PLGPolygon, error) {
 			return nil, InvalidSyntax
 		}
 
-		polygons = append(polygons, *poly)
+		polygons = append(polygons, poly)
 	}
 
 	return polygons, nil

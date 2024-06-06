@@ -2,65 +2,58 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"lydian/internal/camera"
 	"lydian/internal/geometry"
 	"lydian/internal/graphics"
 	"lydian/internal/math"
 	"lydian/internal/rendering"
-	"lydian/internal/rendering/camera"
-)
-
-const (
-	screenWidth  = 800
-	screenHeight = 600
 )
 
 type Game struct {
-	cube       rendering.Object3D
-	ground     *rendering.RenderList
-	cubePos    *math.Vector
-	cubeRot    *math.Vector
-	camera     camera.Camera
-	cameraPos  *math.Vector
-	cameraRot  *math.Vector
-	forward    *math.Vector
-	left       *math.Vector
-	lastMouseX int
-	lastMouseY int
-	clipper    graphics.Clipper
+	ScreenWidth  int
+	ScreenHeight int
+
+	cameraPos    *math.Vector
+	cameraRot    *math.Vector
+	camera       *camera.Camera
+	forward      *math.Vector
+	left         *math.Vector
+	upward       *math.Vector
+	lastMouseX   int
+	lastMouseY   int
+	triangleList []*rendering.Triangle3D
+	clipper      graphics.Clipper
+	cubes        []*rendering.Object3D
+	scene        *rendering.Scene
 }
 
 func (g *Game) Init() error {
-	g.clipper = graphics.Clipper{MinX: 0, MinY: 0, MaxX: screenWidth - 1, MaxY: screenHeight - 1}
+	g.clipper = graphics.Clipper{MinX: 0, MinY: 0, MaxX: g.ScreenWidth - 1, MaxY: g.ScreenHeight - 1}
 
-	pos := math.NewVector(0, 0, 0)
-	scale := math.NewVector(5, 5, 5)
-	rot := math.NewVector(0, 0, 0)
+	g.cameraPos = math.NewVector3(0, 0, 0)
+	g.cameraRot = math.NewVector3(0, 0, 0)
+	g.forward = math.NewVector3(0, 0, 1)
+	g.left = math.NewVector3(-1, 0, 0)
+	g.upward = math.NewVector3(0, 1, 0)
 
-	g.ground = createMap(100)
+	viewPortSize := &geometry.Dimension{
+		Width:  float64(g.ScreenWidth - 1),
+		Height: float64(g.ScreenHeight - 1),
+	}
 
-	cube, err := rendering.Load("/Users/marcelopereira/GolandProjects/lydian/internal/game/resources/cube.plg", *pos, *scale, *rot)
+	cam := camera.NewEuler(g.cameraPos, g.cameraRot, math.RotationZYX, 0, 1000, 90, viewPortSize)
+	// cam := camera.NewUVN(g.cameraPos, math.NewVector3(0, 0, 1), 0, 500, 90, viewPortSize)
+	g.camera = cam
+
+	g.triangleList = createMap(1000)
+
+	cubes, err := Cubes(5)
 	if err != nil {
 		return err
 	}
-	g.cube = *cube
+	g.cubes = cubes
 
-	g.cameraPos = math.NewVector(0, 0, 0)
-	g.cameraRot = math.NewVector(0, 0, 0)
-
-	viewPortSize := geometry.Dimension{
-		Width:  screenWidth - 1,
-		Height: screenHeight - 1,
-	}
-
-	euler := camera.NewEuler(*g.cameraPos, *g.cameraRot, math.RotationZYX, 50, 500, 90, viewPortSize)
-	g.camera = euler
-
-	g.cubePos = math.NewVector(0, 0, 100)
-	g.cubeRot = math.NewVector(0, 0, 0)
-
-	g.forward = math.NewVector(0, 0, 1)
-	g.left = math.NewVector(-1, 0, 0)
-
+	g.scene = rendering.NewScene()
 	return nil
 }
 
@@ -89,51 +82,61 @@ func (g *Game) Update() error {
 	g.cameraRot.Y -= float64(dx)
 
 	rot := math.RotationMatrix(float64(dx), math.YAxis)
-	g.forward = rot.MultiplyVertex(*g.forward)
-	g.left = rot.MultiplyVertex(*g.left)
+	g.forward = rot.MultiplyVertex(g.forward)
+	g.left = rot.MultiplyVertex(g.left)
+	g.upward = rot.MultiplyVertex(g.upward)
 
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.cameraPos = g.cameraPos.Add(*g.forward)
+		g.cameraPos = g.cameraPos.Add(g.forward)
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.cameraPos = g.cameraPos.Sub(*g.forward)
+		g.cameraPos = g.cameraPos.Sub(g.forward)
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.cameraPos = g.cameraPos.Add(*g.left)
+		g.cameraPos = g.cameraPos.Add(g.left)
 	}
 
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.cameraPos = g.cameraPos.Sub(*g.left)
+		g.cameraPos = g.cameraPos.Sub(g.left)
 	}
 
-	g.ground.Reset()
+	if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		g.cameraPos = g.cameraPos.Add(g.upward)
+	}
 
-	g.cube.Reset()
-	g.cube.SetWorldPos(g.cubePos.X, g.cubePos.Y, g.cubePos.Z)
+	if ebiten.IsKeyPressed(ebiten.KeyControlLeft) {
+		g.cameraPos = g.cameraPos.Sub(g.upward)
+	}
 
-	g.cubeRot.X += 1
-	g.cubeRot.Y += 1
-	g.cubeRot.Z += 1
+	g.camera.SetPos(g.cameraPos)
+	g.camera.Rotate(g.cameraRot)
+	// g.camera.SetPolarCoordinates(g.cameraRot.X, g.cameraRot.Y)
 
-	rotation := math.RotationSequenceMatrix(g.cubeRot.X, g.cubeRot.Y, g.cubeRot.Z, math.RotationZYX)
-	g.cube.Transform(rotation, rendering.LocalToTransformed, true)
-
-	g.camera.SetPosition(g.cameraPos.X, g.cameraPos.Y, g.cameraPos.Z)
-	g.camera.(*camera.EulerCamera).SetRotation(g.cameraRot.X, g.cameraRot.Y, g.cameraRot.Z)
+	g.camera.Clear()
 	g.camera.Update()
-	g.cube.Update(g.camera)
-	g.ground.Update(g.camera)
+
+	for _, t := range g.triangleList {
+		g.camera.AddTriangleToCamera(t)
+	}
+
+	g.scene.Clear()
+
+	for _, cube := range g.cubes {
+		g.scene.AddToScene(cube)
+	}
+
+	g.camera.AddSceneToCamera(g.scene)
+	g.camera.ProjectTriangles()
 
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	// graphics.DrawObject(screen, g.clipper, g.cube)
-	graphics.DrawRenderList(screen, g.clipper, g.ground)
+	graphics.Rasterize(screen, g.clipper, g.camera)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	return screenWidth, screenHeight
+	return g.ScreenWidth, g.ScreenHeight
 }

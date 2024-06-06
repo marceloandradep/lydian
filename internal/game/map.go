@@ -5,24 +5,27 @@ import (
 	"lydian/internal/rendering"
 )
 
-func createMap(size float64) *rendering.RenderList {
+func createMap(size float64) []*rendering.Triangle3D {
 	halfSize := size / 2
 	numSquares := int(size / 10)
 
 	x := -halfSize
-	z := 0.0
+	z := -halfSize
 
-	polygonList := make([]rendering.PolyFace, 0)
+	vertexList := make([]*math.Vector, 0)
+	triangleList := make([]*rendering.Triangle3D, 0)
 
 	for i := 0; i < numSquares; i++ {
 		for j := 0; j < numSquares; j++ {
-			v0 := math.NewVector(x, -10, z)
-			v1 := math.NewVector(x+10, -10, z)
-			v2 := math.NewVector(x+10, -10, z+10)
-			v3 := math.NewVector(x, -10, z+10)
+			index := len(vertexList)
 
-			polygonList = append(polygonList, *rendering.NewPolyFace(*v0, *v1, *v2, 0xffffffff))
-			polygonList = append(polygonList, *rendering.NewPolyFace(*v0, *v2, *v3, 0xffffffff))
+			vertexList = append(vertexList, math.NewVector3(x, -10, z))
+			vertexList = append(vertexList, math.NewVector3(x+10, -10, z))
+			vertexList = append(vertexList, math.NewVector3(x+10, -10, z+10))
+			vertexList = append(vertexList, math.NewVector3(x, -10, z+10))
+
+			triangleList = append(triangleList, rendering.NewTriangle3D(vertexList, index, index+1, index+2, true, 0x00ff00ff))
+			triangleList = append(triangleList, rendering.NewTriangle3D(vertexList, index, index+2, index+3, true, 0x00ff00ff))
 
 			x += 10
 		}
@@ -30,13 +33,5 @@ func createMap(size float64) *rendering.RenderList {
 		x = -halfSize
 	}
 
-	/*v0 := math.NewVector(-5, -5, 100)
-	v1 := math.NewVector(5, -5, 100)
-	v2 := math.NewVector(0, 5, 100)
-
-	polygonList = append(polygonList, *rendering.NewPolyFace(*v2, *v1, *v0, 0xffffffff))*/
-
-	return &rendering.RenderList{
-		PolygonList: polygonList,
-	}
+	return triangleList
 }
