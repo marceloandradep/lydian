@@ -1,8 +1,8 @@
 package game
 
 import (
-	"lydian/internal/math"
-	"lydian/internal/rendering"
+	"github.com/marceloandradep/lydian/internal/math"
+	"github.com/marceloandradep/lydian/internal/rendering"
 )
 
 func Cubes(n int) ([]*rendering.Object3D, error) {

@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/marceloandradep/lydian/internal/game"
 	"log"
-	"lydian/internal/game"
 )
 
 const (

@@ -1,9 +1,9 @@
 package rendering
 
 import (
-	"lydian/internal/math"
-	"lydian/internal/utlis/plgparser"
-	"lydian/internal/utlis/plgparser/plgpolygon"
+	"github.com/marceloandradep/lydian/internal/math"
+	"github.com/marceloandradep/lydian/internal/utlis/plgparser"
+	"github.com/marceloandradep/lydian/internal/utlis/plgparser/plgpolygon"
 	"os"
 )
 

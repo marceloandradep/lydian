@@ -1,9 +1,9 @@
 package camera
 
 import (
-	"lydian/internal/geometry"
-	"lydian/internal/math"
-	"lydian/internal/rendering"
+	"github.com/marceloandradep/lydian/internal/geometry"
+	"github.com/marceloandradep/lydian/internal/math"
+	"github.com/marceloandradep/lydian/internal/rendering"
 	m "math"
 )
 

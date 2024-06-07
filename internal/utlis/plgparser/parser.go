@@ -2,8 +2,8 @@ package plgparser
 
 import (
 	"bufio"
+	"github.com/marceloandradep/lydian/internal/utlis/plgparser/plgpolygon"
 	"io"
-	"lydian/internal/utlis/plgparser/plgpolygon"
 	"strconv"
 	"strings"
 )

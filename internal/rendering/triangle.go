@@ -1,6 +1,6 @@
 package rendering
 
-import "lydian/internal/math"
+import "github.com/marceloandradep/lydian/internal/math"
 
 type Triangle3D struct {
 	Indices  [3]int

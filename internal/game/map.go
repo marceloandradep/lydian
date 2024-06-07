@@ -1,8 +1,8 @@
 package game
 
 import (
-	"lydian/internal/math"
-	"lydian/internal/rendering"
+	"github.com/marceloandradep/lydian/internal/math"
+	"github.com/marceloandradep/lydian/internal/rendering"
 	"math/rand"
 )
 

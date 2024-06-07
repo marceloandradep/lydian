@@ -1,11 +1,8 @@
-module lydian
+module github.com/marceloandradep/lydian
 
 go 1.22
 
-require (
-	github.com/hajimehoshi/ebiten/v2 v2.7.4
-	golang.org/x/image v0.16.0
-)
+require github.com/hajimehoshi/ebiten/v2 v2.7.4
 
 require (
 	github.com/ebitengine/gomobile v0.0.0-20240518074828-e86332849895 // indirect

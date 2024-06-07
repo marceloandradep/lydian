@@ -2,7 +2,7 @@ package graphics
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"lydian/internal/camera"
+	"github.com/marceloandradep/lydian/internal/camera"
 )
 
 func Rasterize(screen *ebiten.Image, clipper Clipper, c *camera.Camera) {

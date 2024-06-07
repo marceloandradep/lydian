@@ -2,11 +2,11 @@ package game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"lydian/internal/camera"
-	"lydian/internal/geometry"
-	"lydian/internal/graphics"
-	"lydian/internal/math"
-	"lydian/internal/rendering"
+	"github.com/marceloandradep/lydian/internal/camera"
+	"github.com/marceloandradep/lydian/internal/geometry"
+	"github.com/marceloandradep/lydian/internal/graphics"
+	"github.com/marceloandradep/lydian/internal/math"
+	"github.com/marceloandradep/lydian/internal/rendering"
 )
 
 type Game struct {
