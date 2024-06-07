@@ -2,7 +2,7 @@ package plgparser
 
 import (
 	"bufio"
-	"github.com/marceloandradep/lydian/internal/utlis/plgparser/plgpolygon"
+	"github.com/marceloandradep/lydian/utlis/plgparser/plgpolygon"
 	"io"
 	"strconv"
 	"strings"

@@ -1,6 +1,6 @@
 package rendering
 
-import "github.com/marceloandradep/lydian/internal/math"
+import "github.com/marceloandradep/lydian/math"
 
 type Scene struct {
 	triangleList []*Triangle3D

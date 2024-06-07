@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/marceloandradep/lydian/internal/game"
+	"github.com/marceloandradep/lydian/game"
 	"log"
 )
 

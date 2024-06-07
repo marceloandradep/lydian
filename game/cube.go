@@ -1,14 +1,14 @@
 package game
 
 import (
-	"github.com/marceloandradep/lydian/internal/math"
-	"github.com/marceloandradep/lydian/internal/rendering"
+	"github.com/marceloandradep/lydian/math"
+	"github.com/marceloandradep/lydian/rendering"
 )
 
 func Cubes(n int) ([]*rendering.Object3D, error) {
 	cubes := make([]*rendering.Object3D, n)
 
-	template, err := rendering.Load("/Users/marcelopereira/GolandProjects/lydian/internal/game/resources/cube.plg", math.NewVector3(0, 0, 0), math.NewVector3(1, 1, 1), math.NewVector3(0, 0, 0))
+	template, err := rendering.Load("/Users/marcelopereira/GolandProjects/lydian/game/resources/cube.plg", math.NewVector3(0, 0, 0), math.NewVector3(1, 1, 1), math.NewVector3(0, 0, 0))
 	if err != nil {
 		return nil, err
 	}
