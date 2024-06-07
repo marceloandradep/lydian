@@ -25,6 +25,32 @@ type Object3D struct {
 	triangleList          []*Triangle3D
 }
 
+func NewObject(vertexList []*math.Vector, triangleList []*Triangle3D) *Object3D {
+	o := &Object3D{
+		worldPos:  math.NewVector3(0, 0, 0),
+		direction: math.NewVector3(0, 0, 1),
+		ux:        math.NewVector3(1, 0, 0),
+		uy:        math.NewVector3(0, 1, 0),
+		uz:        math.NewVector3(0, 0, 1),
+	}
+
+	o.vertexList = make([]*math.Vector, 0)
+	o.transformedVertexList = make([]*math.Vector, 0)
+	for _, vertex := range vertexList {
+		o.vertexList = append(o.vertexList, vertex)
+		o.transformedVertexList = append(o.transformedVertexList, vertex.Copy())
+	}
+
+	o.computeRadius()
+
+	o.triangleList = make([]*Triangle3D, 0)
+	for _, t := range triangleList {
+		o.triangleList = append(o.triangleList, NewTriangle3D(o.transformedVertexList, t.Indices[0], t.Indices[1], t.Indices[2], t.Is2Sided, t.Color))
+	}
+
+	return o
+}
+
 func (o *Object3D) Copy(pos, scale, rotation *math.Vector) *Object3D {
 	copied := &Object3D{
 		maxRadius: o.maxRadius,
