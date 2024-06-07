@@ -73,6 +73,10 @@ func (c *Camera) SetPos(newPos *math.Vector) {
 	c.pos.Set(newPos)
 }
 
+func (c *Camera) GetPos() *math.Vector {
+	return c.pos
+}
+
 func (c *Camera) Rotate(rotation *math.Vector) {
 	c.rotation.Set(rotation)
 }
