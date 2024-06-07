@@ -30,24 +30,24 @@ type Game struct {
 func (g *Game) Init() error {
 	g.clipper = graphics.Clipper{MinX: 0, MinY: 0, MaxX: g.ScreenWidth - 1, MaxY: g.ScreenHeight - 1}
 
-	g.cameraPos = math.NewVector3(0, 0, 0)
+	g.cameraPos = math.NewVector3(0, 150, 0)
 	g.cameraRot = math.NewVector3(0, 0, 0)
-	g.forward = math.NewVector3(0, 0, 1)
-	g.left = math.NewVector3(-1, 0, 0)
-	g.upward = math.NewVector3(0, 1, 0)
+	g.forward = math.NewVector3(0, 0, 2)
+	g.left = math.NewVector3(-2, 0, 0)
+	g.upward = math.NewVector3(0, 2, 0)
 
 	viewPortSize := &geometry.Dimension{
 		Width:  float64(g.ScreenWidth - 1),
 		Height: float64(g.ScreenHeight - 1),
 	}
 
-	cam := camera.NewEuler(g.cameraPos, g.cameraRot, math.RotationZYX, 0, 1000, 90, viewPortSize)
+	cam := camera.NewEuler(g.cameraPos, g.cameraRot, math.RotationZYX, 0, 3000, 90, viewPortSize)
 	// cam := camera.NewUVN(g.cameraPos, math.NewVector3(0, 0, 1), 0, 500, 90, viewPortSize)
 	g.camera = cam
 
-	g.triangleList = createMap(1000)
+	g.triangleList = createMap(5000)
 
-	cubes, err := Cubes(5)
+	cubes, err := Cubes(1)
 	if err != nil {
 		return err
 	}
@@ -128,6 +128,44 @@ func (g *Game) Update() error {
 	}
 
 	g.camera.AddSceneToCamera(g.scene)
+
+	// debug
+
+	vertices := make([]*math.Vector, 0)
+	vertices = append(vertices, math.NewVector3(-2, 0, 1))
+	vertices = append(vertices, math.NewVector3(0, 2, 1))
+	vertices = append(vertices, math.NewVector3(0, -2, 1))
+	vertices = append(vertices, math.NewVector3(2, 0, 1))
+
+	t1 := rendering.NewTriangle3D(vertices, 0, 1, 2, true, 0xff0000ff)
+	t2 := rendering.NewTriangle3D(vertices, 1, 3, 2, true, 0xff0000ff)
+
+	pos := g.cubes[0].GetWorldPos()
+
+	r := math.RotationMatrix(22, math.ZAxis)
+	scale := math.ScaleMatrix(1, 1, 1)
+	translation := math.TranslationMatrix(30, 9, 0)
+	transform := r.MultiplyMatrix(scale.MultiplyMatrix(translation))
+
+	for _, v := range vertices {
+		v.Set(transform.MultiplyVertex(v))
+	}
+
+	// project into object
+
+	scale = math.ScaleMatrix(5, 5, 5)
+	translation = math.TranslationMatrix(pos.X, pos.Y, pos.Z)
+	transform = scale.MultiplyMatrix(translation)
+
+	for _, v := range vertices {
+		v.Set(transform.MultiplyVertex(v))
+	}
+
+	g.camera.AddTriangleToCamera(t1)
+	g.camera.AddTriangleToCamera(t2)
+
+	//
+
 	g.camera.ProjectTriangles()
 
 	return nil

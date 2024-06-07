@@ -13,16 +13,17 @@ func Cubes(n int) ([]*rendering.Object3D, error) {
 		return nil, err
 	}
 
-	padding := 100
-	cubeSize := 25
-	totalSize := n * (padding + cubeSize)
+	padding := 100.0
+	cubeSize := 25.0
+	totalSize := float64(n) * (padding + cubeSize)
 
 	scale := math.NewVector3(5, 5, 5)
 	rot := math.NewVector3(0, 0, 0)
 
-	x := -totalSize / 2
+	x := float64(-totalSize) / 2
+	y := (float64(cubeSize) / 2) + 20
 	for i := 0; i < n; i++ {
-		pos := math.NewVector3(float64(x), 17, 200)
+		pos := math.NewVector3(x, y, 200)
 		cube := template.Copy(pos, scale, rot)
 		cubes[i] = cube
 		x += cubeSize + padding
